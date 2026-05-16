@@ -4,7 +4,6 @@ flask-login
 pandas
 numpy
 scikit-learn
-tensorflow-cpu
 reportlab
 faker
 sqlalchemy
