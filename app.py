@@ -1,9 +1,7 @@
 import os
-
 from flask import Flask, redirect, render_template, request, url_for
 from flask_login import LoginManager, current_user, login_required, login_user, logout_user
 from werkzeug.security import check_password_hash
-
 from config import SECRET_KEY
 from models.analytics import detect_anomalies
 from models.database import get_user_by_email, get_user_by_id
@@ -16,17 +14,16 @@ from routes.settings import init_settings_schema, settings_bp, update_last_login
 from routes.territories import territories_bp
 
 app = Flask(__name__)
-app.config["SECRET_KEY"] = SECRET_KEY
+app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", SECRET_KEY)
+
 init_settings_schema()
 
 login_manager = LoginManager(app)
 login_manager.login_view = "login"
 
-
 @login_manager.user_loader
 def load_user(user_id):
     return get_user_by_id(user_id)
-
 
 @app.context_processor
 def inject_user_context():
@@ -35,13 +32,11 @@ def inject_user_context():
         anomalies = detect_anomalies(current_user)[:8]
     return {"anomalies": anomalies, "anomaly_count": len(anomalies)}
 
-
 @app.route("/")
 def index():
     if current_user.is_authenticated:
         return redirect(url_for("dashboard.dashboard"))
     return redirect(url_for("login"))
-
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -55,13 +50,11 @@ def login():
         error = "Invalid email or password."
     return render_template("login.html", error=error, auth_page=True)
 
-
 @app.route("/logout")
 @login_required
 def logout():
     logout_user()
     return redirect(url_for("login"))
-
 
 app.register_blueprint(dashboard_bp)
 app.register_blueprint(reps_bp)
@@ -71,6 +64,6 @@ app.register_blueprint(forecast_bp)
 app.register_blueprint(chatbot_bp)
 app.register_blueprint(settings_bp)
 
-
 if __name__ == "__main__":
-    app.run(host="127.0.0.1", port=5000, debug=False, use_reloader=False)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=False)
