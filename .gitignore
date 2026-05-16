@@ -3,7 +3,6 @@ __pycache__/
 .env
 server.err.log
 server.out.log
-*.db
 instance/
 
 venv/
