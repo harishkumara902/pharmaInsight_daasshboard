@@ -1,0 +1,11 @@
+flask
+flask-login
+pandas
+numpy
+scikit-learn
+keras
+tensorflow
+reportlab
+faker
+sqlalchemy
+google-generativeai

@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PharmaInsight AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=3">
+</head>
+<body class="{% if auth_page %}auth-body{% endif %}">
+<div id="splash-screen">
+  <div class="splash-mark">
+    <div class="logo-symbol">PI</div>
+    <h1>PharmaInsight AI</h1>
+    <p>Data-Driven Sales Intelligence</p>
+  </div>
+</div>
+{% if not auth_page %}
+<aside class="sidebar">
+  <div class="logo"><b class="mini-logo">PI</b>PharmaInsight AI<span></span></div>
+  <nav>
+    <a class="{{ 'active' if active == 'dashboard' else '' }}" href="{{ url_for('dashboard.dashboard') }}"><span>▦</span> <b data-i18n="dashboard">Dashboard</b></a>
+    <a class="{{ 'active' if active == 'reps' else '' }}" href="{{ url_for('reps.reps') }}"><span>◌</span> <b data-i18n="reps">Reps</b></a>
+    <a class="{{ 'active' if active == 'drugs' else '' }}" href="{{ url_for('drugs.drugs') }}"><span>✚</span> <b data-i18n="drugs">Drugs</b></a>
+    <a class="{{ 'active' if active == 'territories' else '' }}" href="{{ url_for('territories.territories') }}"><span>◎</span> <b data-i18n="territories">Territories</b></a>
+    <a class="{{ 'active' if active == 'forecast' else '' }}" href="{{ url_for('forecast.forecast_page') }}"><span>⌁</span> <b data-i18n="forecast">Forecast</b></a>
+    <a class="{{ 'active' if active == 'simulator' else '' }}" href="{{ url_for('forecast.simulator') }}"><span>◧</span> <b data-i18n="simulator">Simulator</b></a>
+    <a class="{{ 'active' if active == 'settings' else '' }}" href="{{ url_for('settings.settings') }}"><span>⚙</span> <b data-i18n="settings">Settings</b></a>
+  </nav>
+  <div class="sidebar-user">
+    <div class="avatar">{{ current_user.initials }}</div>
+    <div>
+      <strong>{{ current_user.name }}</strong>
+      <span>{{ current_user.role }}</span>
+    </div>
+  </div>
+  <a class="logout" href="{{ url_for('logout') }}" data-i18n="logout">Logout</a>
+</aside>
+<main class="app-shell">
+  <header class="topbar">
+    <div>
+      <h1>{% block page_title %}Dashboard{% endblock %}</h1>
+      <p data-i18n="tagline">Data-driven sales intelligence</p>
+    </div>
+    <div class="top-actions">
+      <select id="currency-select" title="Currency">
+        <option value="INR" selected>₹ INR</option>
+        <option value="USD">$ USD</option>
+      </select>
+      <select id="language-select" title="Language">
+        <option value="en" selected>English</option>
+        <option value="hi">हिन्दी</option>
+        <option value="te">తెలుగు</option>
+      </select>
+      <select id="global-quarter">
+        <option>Q1</option><option>Q2</option><option>Q3</option><option selected>Q4</option>
+      </select>
+      <select id="global-year"><option selected>2024</option></select>
+      <button class="icon-btn" id="bell-btn">🔔<span id="anomaly-count">{{ anomaly_count }}</span></button>
+      <div class="anomaly-menu" id="anomaly-menu">
+        {% for anomaly in anomalies %}
+        <p>{{ anomaly.message }}</p>
+        {% else %}
+        <p>No anomalies in your visible data.</p>
+        {% endfor %}
+      </div>
+    </div>
+  </header>
+  {% block content %}{% endblock %}
+</main>
+<div class="chatbot">
+  <div class="chat-nudge" id="chat-nudge">
+    <strong>Need help?</strong>
+    <p>PharmaInsight AI chatbot can answer sales questions.</p>
+    <button id="chat-nudge-open">Open Chat</button>
+    <button id="chat-nudge-close">Not now</button>
+  </div>
+  <button id="chat-toggle">✦</button>
+  <section id="chat-panel" class="chat-panel">
+    <header>PharmaInsight AI</header>
+    <div id="chat-history"></div>
+    <div class="chips">
+      <button>Top rep?</button><button>Worst territory?</button><button>Best drug?</button><button>Q4 forecast?</button>
+    </div>
+    <form id="chat-form"><input id="chat-input" placeholder="Ask about sales data"><button>Send</button></form>
+  </section>
+</div>
+{% endif %}
+{% block auth_content %}{% endblock %}
+<script src="{{ url_for('static', filename='js/main.js') }}?v=3"></script>
+<script src="{{ url_for('static', filename='js/charts.js') }}?v=3"></script>
+<script src="{{ url_for('static', filename='js/chatbot.js') }}?v=3"></script>
+</body>
+</html>

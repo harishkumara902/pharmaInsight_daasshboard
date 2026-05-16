@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block page_title %}Dashboard{% endblock %}
+{% block content %}
+<section class="kpi-grid">
+  <article class="card kpi"><span>Total Revenue</span><strong data-kpi="total_revenue">$0</strong><em data-trend="revenue">↗ 0%</em></article>
+  <article class="card kpi"><span>Quota Attainment</span><strong data-kpi="quota_attainment">0%</strong><em data-trend="quota">↗ 0%</em></article>
+  <article class="card kpi"><span>Top Rep</span><strong data-kpi="top_rep">-</strong><em>leader</em></article>
+  <article class="card kpi"><span>Top Drug</span><strong data-kpi="top_drug">-</strong><em>portfolio</em></article>
+</section>
+<section class="grid-2">
+  <article class="card chart-card">
+    <div class="card-head"><h2>Sales vs Quota</h2><button class="secondary" data-export="pdf">Export PDF</button></div>
+    <canvas id="salesQuotaChart"></canvas>
+  </article>
+  <article class="card insights">
+    <div class="card-head"><h2>AI Insights</h2><button class="secondary" id="refresh-insights">Refresh</button></div>
+    <div id="insights-list" class="skeleton"></div>
+  </article>
+</section>
+<section class="card">
+  <div class="card-head"><h2>Rep Leaderboard</h2><button class="primary" data-csv="reps">Export CSV</button></div>
+  <div class="table-wrap"><table id="rep-table"><thead><tr><th>Rank</th><th>Rep Name</th><th>Region</th><th>Revenue</th><th>Quota%</th><th>Badge</th><th>Trend</th></tr></thead><tbody></tbody></table></div>
+</section>
+<section class="card anomaly-card">
+  <h2>Anomaly Summary</h2>
+  <div id="anomaly-summary"></div>
+</section>
+<div class="modal" id="rep-modal"><div class="modal-box"><button class="modal-close">×</button><h2 id="modal-name"></h2><p id="modal-meta"></p><canvas id="repSparkline"></canvas></div></div>
+{% endblock %}

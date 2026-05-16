@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block page_title %}What-If Simulator{% endblock %}
+{% block content %}
+<section class="card simulator">
+  <div class="card-head"><h2>Scenario Controls</h2><button class="secondary" data-export="pdf">Export Scenario PDF</button></div>
+  <label>Quota Adjustment % <input id="quota-slider" type="range" min="-20" max="30" value="0"><strong id="quota-val">0%</strong></label>
+  <label>Marketing Spend % <input id="marketing-slider" type="range" min="0" max="50" value="0"><strong id="marketing-val">0%</strong></label>
+  <div class="counter"><span id="hit-target">0</span> reps projected to hit target</div>
+  <canvas id="simChart"></canvas>
+</section>
+{% endblock %}

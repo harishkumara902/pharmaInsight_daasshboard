@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block auth_content %}
+<div class="login-wrap">
+  <section class="login-brand">
+    <div class="logo big">PharmaInsight AI<span></span></div>
+    <h1>Data-Driven Sales Intelligence</h1>
+    <p>Role-aware analytics for reps, managers, and executive teams.</p>
+    <ul>
+      <li>Live sales and quota performance</li>
+      <li>AI insights and forecast guidance</li>
+      <li>Secure regional data access</li>
+    </ul>
+  </section>
+  <section class="login-card {% if error %}shake{% endif %}">
+    <h2>Sign in</h2>
+    {% if error %}<div class="login-error">{{ error }}</div>{% endif %}
+    <form method="post" id="login-form">
+      <label>Email<input name="email" id="login-email" type="email" required></label>
+      <label>Password<input name="password" id="login-password" type="password" required></label>
+      <label class="remember"><input name="remember" type="checkbox"> Remember me</label>
+      <button class="primary full">Login</button>
+    </form>
+    <div class="demo-pills">
+      <button data-email="admin@pharma.com" data-password="Admin@123">Admin Login</button>
+      <button data-email="manager@pharma.com" data-password="Manager@123">Manager Login</button>
+      <button data-email="rep@pharma.com" data-password="Rep@123">Rep Login</button>
+    </div>
+  </section>
+</div>
+{% endblock %}

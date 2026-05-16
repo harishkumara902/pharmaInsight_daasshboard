@@ -1,0 +1,6 @@
+{% extends "base.html" %}
+{% block page_title %}Sales Reps{% endblock %}
+{% block content %}
+<section class="card"><div class="card-head"><h2>Rep Leaderboard</h2><button class="primary" data-csv="reps">Export CSV</button></div><div class="table-wrap"><table id="rep-table"><thead><tr><th>Rank</th><th>Rep Name</th><th>Region</th><th>Revenue</th><th>Quota%</th><th>Badge</th><th>Trend</th></tr></thead><tbody></tbody></table></div></section>
+<div class="modal" id="rep-modal"><div class="modal-box"><button class="modal-close">×</button><h2 id="modal-name"></h2><p id="modal-meta"></p><canvas id="repSparkline"></canvas></div></div>
+{% endblock %}

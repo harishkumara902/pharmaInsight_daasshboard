@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+{% block page_title %}<span data-i18n="settings">Settings</span>{% endblock %}
+{% block content %}
+<div class="settings-page" data-prefs='{{ prefs | tojson }}'>
+  <nav class="settings-nav">
+    <a class="active" href="#profile">Profile<span></span></a>
+    <a href="#security">Security<span></span></a>
+    <a href="#notifications">Notifications<span></span></a>
+    <a href="#appearance">Appearance<span></span></a>
+    <a href="#charts">Charts<span></span></a>
+    <a href="#data-export">Data & Export<span></span></a>
+    <a href="#ai-ml">AI & ML<span></span></a>
+    {% if current_user.role == 'admin' %}<a href="#team">Team Management<span></span></a>{% endif %}
+    <a href="#integrations">Integrations<span></span></a>
+  </nav>
+
+  <div class="settings-content">
+    <section class="card settings-section" id="profile">
+      <div class="card-head"><h2>Profile Settings</h2><button class="primary settings-save" data-form="profile-form">Save Changes</button></div>
+      <form id="profile-form" class="settings-form" action="/settings/profile" enctype="multipart/form-data">
+        <div class="profile-photo-row">
+          {% if settings_user.profile_photo %}
+          <img class="profile-photo" src="{{ settings_user.profile_photo }}" alt="Profile photo">
+          {% else %}
+          <div class="avatar large">{{ current_user.initials }}</div>
+          {% endif %}
+          <label class="upload-btn">Upload Photo<input type="file" name="profile_photo" accept="image/*"></label>
+        </div>
+        <label>Display Name<input name="name" value="{{ settings_user.name }}" required></label>
+        <label>Email Address<input name="email" value="{{ settings_user.email }}" {% if current_user.role == 'rep' %}readonly{% endif %}></label>
+        <label>Phone Number<input name="phone" value="{{ settings_user.phone or '' }}" placeholder="+91 98765 43210"></label>
+        <label>Job Title<input name="job_title" value="{{ settings_user.job_title or '' }}" placeholder="Regional Sales Lead"></label>
+        <label>Region<select name="region">{% for region in ['North','South','East','West','Central'] %}<option {% if settings_user.region == region %}selected{% endif %}>{{ region }}</option>{% endfor %}</select></label>
+      </form>
+    </section>
+
+    <section class="card settings-section" id="security">
+      <div class="card-head"><h2>Security</h2><button class="primary settings-save" data-json-form="password-form" data-endpoint="/settings/password">Save Changes</button></div>
+      <form id="password-form" class="settings-form">
+        <label>Current Password<input type="password" name="current_password"></label>
+        <label>New Password<input type="password" name="new_password" id="new-password"><span class="strength"><i></i></span><small id="strength-label">Enter 8+ chars, 1 uppercase, 1 number</small></label>
+        <label>Confirm New Password<input type="password" name="confirm_password"></label>
+      </form>
+      <div class="settings-card-row">
+        <div class="mini-card"><strong>Current session</strong><p>Browser session from local app, IP 127.0.0.1, last login {{ settings_user.last_login or 'Just now' }}</p><button class="secondary toast-info">Logout all other sessions</button></div>
+        <div class="mini-card"><strong>Two-Factor Authentication</strong><span class="coming">Coming Soon</span><label class="switch-row">Enable 2FA <input type="checkbox" disabled><i></i></label></div>
+      </div>
+    </section>
+
+    <section class="card settings-section" id="notifications">
+      <div class="card-head"><h2>Notifications</h2><button class="primary settings-save" data-pref-form="notifications-form" data-endpoint="/settings/notifications">Save Changes</button></div>
+      <form id="notifications-form" class="settings-form">
+        <h3>Dashboard Alerts</h3>
+        <label class="switch-row">Quota below 70% alert<input name="notify_quota_alert" type="checkbox" {% if prefs.notify_quota_alert %}checked{% endif %}><i></i></label>
+        <label class="switch-row">Anomaly detected alert<input name="notify_anomaly" type="checkbox" {% if prefs.notify_anomaly %}checked{% endif %}><i></i></label>
+        <label class="switch-row">New rep added to team<input name="notify_new_rep" type="checkbox" {% if prefs.notify_new_rep %}checked{% endif %}><i></i></label>
+        <label class="switch-row">Monthly performance report<input name="notify_monthly_report" type="checkbox" {% if prefs.notify_monthly_report %}checked{% endif %}><i></i></label>
+        <h3>Email Notifications</h3>
+        <label class="switch-row">Weekly digest email<input name="notify_weekly_digest" type="checkbox" {% if prefs.notify_weekly_digest %}checked{% endif %}><i></i></label>
+        <label class="switch-row">Daily KPI summary<input name="notify_daily_kpi" type="checkbox" {% if prefs.notify_daily_kpi %}checked{% endif %}><i></i></label>
+        <label class="switch-row">Rep underperformance alert<input name="notify_rep_underperformance" type="checkbox" {% if prefs.notify_rep_underperformance %}checked{% endif %}><i></i></label>
+        <label>Notification Frequency<select name="notification_frequency"><option value="real-time">Real-time</option><option value="daily" selected>Daily</option><option value="weekly">Weekly</option><option value="monthly">Monthly</option></select></label>
+        <label>Alert Threshold <b id="quota-threshold-label">{{ prefs.quota_alert_threshold }}%</b><input id="quota-threshold" name="quota_alert_threshold" type="range" min="50" max="90" step="5" value="{{ prefs.quota_alert_threshold }}"></label>
+      </form>
+    </section>
+
+    <section class="card settings-section" id="appearance">
+      <div class="card-head"><h2>Appearance</h2><button class="primary settings-save" data-pref-form="appearance-form" data-endpoint="/settings/appearance">Save Changes</button></div>
+      <form id="appearance-form" class="settings-form">
+        <h3>Theme Mode</h3>
+        <div class="option-cards" data-choice="theme">
+          <button type="button" data-value="light" class="{{ 'selected' if prefs.theme == 'light' else '' }}">Light Mode</button>
+          <button type="button" data-value="dark" class="{{ 'selected' if prefs.theme == 'dark' else '' }}">Dark Mode</button>
+          <button type="button" data-value="system" class="{{ 'selected' if prefs.theme == 'system' else '' }}">System Default</button>
+          <input type="hidden" name="theme" value="{{ prefs.theme }}">
+        </div>
+        <label class="switch-row">Sidebar collapsed<input name="sidebar_collapsed" type="checkbox" {% if prefs.sidebar_collapsed %}checked{% endif %}><i></i></label>
+        <h3>Font Size</h3><div class="segmented" data-choice="font_size"><button type="button" data-value="small">Small</button><button type="button" data-value="medium">Medium</button><button type="button" data-value="large">Large</button><input type="hidden" name="font_size" value="{{ prefs.font_size }}"></div>
+        <h3>Color Accent</h3><div class="swatches" data-choice="accent_color">{% for color in ['#FF85BB','#4F9EF8','#2ECC71','#F39C12','#9B59B6'] %}<button type="button" style="background:{{ color }}" data-value="{{ color }}" class="{{ 'selected' if prefs.accent_color == color else '' }}"></button>{% endfor %}<input type="hidden" name="accent_color" value="{{ prefs.accent_color }}"></div>
+        <h3>Dashboard Layout</h3><div class="segmented" data-choice="layout"><button type="button" data-value="compact">Compact</button><button type="button" data-value="comfortable">Comfortable</button><button type="button" data-value="spacious">Spacious</button><input type="hidden" name="layout" value="{{ prefs.layout }}"></div>
+      </form>
+    </section>
+
+    <section class="card settings-section" id="charts">
+      <div class="card-head"><h2>Charts Settings</h2><button class="primary settings-save" data-pref-form="charts-form" data-endpoint="/settings/charts">Save Changes</button></div>
+      <form id="charts-form" class="settings-form">
+        <label>Sales overview<select name="sales_chart_type"><option>Bar</option><option>Line</option><option>Area</option></select></label>
+        <label>Drug trends<select name="drug_chart_type"><option>Line</option><option>Bar</option></select></label>
+        <label>Territory<select name="territory_chart_type"><option>Bubble</option><option>Bar</option></select></label>
+        <label class="switch-row">Enable chart animations on load<input name="chart_animations" type="checkbox" {% if prefs.chart_animations %}checked{% endif %}><i></i></label>
+        <h3>Animation speed</h3><div class="segmented"><button type="button">Slow</button><button type="button" class="selected">Normal</button><button type="button">Fast</button></div>
+        <label class="switch-row">Show values on chart bars/lines<input name="show_data_labels" type="checkbox" {% if prefs.show_data_labels %}checked{% endif %}><i></i></label>
+        <label class="switch-row">Show percentage labels<input name="show_percentage_labels" type="checkbox" checked><i></i></label>
+        <h3>Chart Color Scheme</h3><div class="scheme-grid" data-choice="chart_color_scheme"><button type="button" data-value="navy-pink" class="selected"><span style="background:#021A54"></span><span style="background:#FF85BB"></span>Navy + Pink</button><button type="button" data-value="blue-teal"><span style="background:#4F9EF8"></span><span style="background:#1ABC9C"></span>Blue + Teal</button><button type="button" data-value="purple-coral"><span style="background:#9B59B6"></span><span style="background:#FF7F6E"></span>Purple + Coral</button><input type="hidden" name="chart_color_scheme" value="{{ prefs.chart_color_scheme }}"></div>
+      </form>
+    </section>
+
+    <section class="card settings-section" id="data-export">
+      <div class="card-head"><h2>Data & Export</h2><button class="primary settings-save" data-form="export-form">Save Changes</button></div>
+      <form id="export-form" class="settings-form" action="/settings/export-config" enctype="multipart/form-data">
+        <label>Default Date Range<select name="default_date_range"><option value="current_quarter">Current Quarter</option><option value="last_quarter">Last Quarter</option><option value="last_6_months">Last 6 Months</option><option value="full_year">Full Year</option></select></label>
+        <div class="radio-row"><label><input type="radio" name="pdf_paper_size" value="A4" checked> A4</label><label><input type="radio" name="pdf_paper_size" value="Letter"> Letter</label></div>
+        <label class="switch-row">Include charts in PDF<input name="pdf_include_charts" type="checkbox" {% if prefs.pdf_include_charts %}checked{% endif %}><i></i></label>
+        <label class="switch-row">Include AI insights in PDF<input name="pdf_include_insights" type="checkbox" {% if prefs.pdf_include_insights %}checked{% endif %}><i></i></label>
+        <label>PDF Header text<input name="pdf_header_text" value="{{ prefs.pdf_header_text }}"></label>
+        <label class="upload-btn">Upload PDF Logo<input name="pdf_logo" type="file" accept="image/*"></label>
+        <label>Auto-refresh interval<select name="auto_refresh_interval"><option value="0">Off</option><option value="30">30 seconds</option><option value="60">1 minute</option><option value="300">5 minutes</option></select></label>
+      </form>
+      <div class="mini-card db-info"><strong>Database Info</strong><p>Total records: {{ total_records }}</p><p>DB size: {{ db_size }} MB</p><p>Last data generation: {{ last_generated }}</p><button class="secondary" id="regen-data">Regenerate Synthetic Data</button></div>
+    </section>
+
+    <section class="card settings-section" id="ai-ml">
+      <div class="card-head"><h2>AI & ML Settings</h2><button class="primary settings-save" data-pref-form="ai-form" data-endpoint="/settings/ai-config">Save Changes</button></div>
+      <form id="ai-form" class="settings-form">
+        <label>AI Model<select name="ai_model"><option value="gemini-1.5-flash">Gemini 1.5 Flash</option><option value="gemini-1.5-pro">Gemini 1.5 Pro</option><option value="gpt-4o-mini">GPT-4o Mini</option></select></label>
+        <div class="radio-row"><label><input type="radio" name="chatbot_personality" value="professional" checked> Professional</label><label><input type="radio" name="chatbot_personality" value="friendly"> Friendly</label><label><input type="radio" name="chatbot_personality" value="concise"> Concise</label></div>
+        <label>Max response length <b id="response-words-label">{{ prefs.max_response_words }} words</b><input id="response-words" name="max_response_words" type="range" min="50" max="500" value="{{ prefs.max_response_words }}"></label>
+        <label class="switch-row">Show suggested chips<input name="show_suggested_chips" type="checkbox" {% if prefs.show_suggested_chips %}checked{% endif %}><i></i></label>
+        <button type="button" class="secondary" id="clear-chat">Clear chat history</button>
+        <label>Forecast horizon<select name="forecast_horizon"><option value="1">1 Quarter</option><option value="2">2 Quarters</option><option value="3">3 Quarters</option></select></label>
+        <div class="radio-row"><label><input type="radio" name="forecast_model" value="lstm" checked> LSTM</label><label><input type="radio" name="forecast_model" value="linear"> Linear Regression</label><label><input type="radio" name="forecast_model" value="prophet"> Prophet</label></div>
+        <div class="radio-row"><label><input type="radio" name="confidence_interval" value="80"> 80%</label><label><input type="radio" name="confidence_interval" value="90" checked> 90%</label><label><input type="radio" name="confidence_interval" value="95"> 95%</label></div>
+        <button type="button" class="secondary" id="settings-retrain">Retrain Model Now</button><span class="progress"><i></i></span>
+        <label class="switch-row">Enable auto insights on load<input name="auto_insights" type="checkbox" {% if prefs.auto_insights %}checked{% endif %}><i></i></label>
+        <label>Number of insights <b id="insight-count-label">{{ prefs.insight_count }}</b><input id="insight-count" name="insight_count" type="range" min="1" max="5" value="{{ prefs.insight_count }}"></label>
+        <div class="segmented" data-choice="insight_tone"><button type="button" data-value="executive">Executive</button><button type="button" data-value="technical">Technical</button><button type="button" data-value="simple">Simple</button><input type="hidden" name="insight_tone" value="{{ prefs.insight_tone }}"></div>
+        <label class="switch-row">Enable anomaly detection<input name="anomaly_detection" type="checkbox" {% if prefs.anomaly_detection %}checked{% endif %}><i></i></label>
+        <div class="segmented" data-choice="anomaly_sensitivity"><button type="button" data-value="low">Low</button><button type="button" data-value="medium">Medium</button><button type="button" data-value="high">High</button><input type="hidden" name="anomaly_sensitivity" value="{{ prefs.anomaly_sensitivity }}"></div>
+        <div class="radio-row"><label><input type="radio" name="detection_method" value="iqr" checked> IQR</label><label><input type="radio" name="detection_method" value="isolation_forest"> Isolation Forest</label></div>
+      </form>
+    </section>
+
+    {% if current_user.role == 'admin' %}
+    <section class="card settings-section" id="team">
+      <div class="card-head"><h2>Team Management</h2></div>
+      <div class="table-wrap"><table><thead><tr><th>Avatar</th><th>Name</th><th>Email</th><th>Role</th><th>Region</th><th>Status</th><th>Actions</th></tr></thead><tbody>{% for user in users %}<tr><td>{% if user.profile_photo %}<img class="mini-avatar" src="{{ user.profile_photo }}" alt="">{% else %}<span class="avatar tiny">{{ user.name[:1] }}</span>{% endif %}</td><td>{{ user.name }}</td><td>{{ user.email }}</td><td><select><option selected>{{ user.role }}</option><option>admin</option><option>manager</option><option>rep</option></select></td><td>{{ user.region or 'All' }}</td><td><span class="badge Gold">{{ user.status or 'Active' }}</span></td><td><button class="secondary remove-user" data-user="{{ user.user_id }}">Remove</button></td></tr>{% endfor %}</tbody></table></div>
+      <form id="add-user-form" class="settings-form inline-add"><input name="name" placeholder="Name" required><input name="email" type="email" placeholder="Email" required><input name="password" type="password" placeholder="Password" required><select name="role"><option>admin</option><option>manager</option><option>rep</option></select><select name="region"><option>North</option><option>South</option><option>East</option><option>West</option><option>Central</option></select><button class="primary">Add User</button></form>
+      <div class="settings-card-row"><div class="mini-card"><strong>Admin</strong><p>All data, settings, team management</p></div><div class="mini-card"><strong>Manager</strong><p>Own region data, no team settings</p></div><div class="mini-card"><strong>Rep</strong><p>Own data only, no team settings</p></div></div>
+    </section>
+    {% endif %}
+
+    <section class="card settings-section" id="integrations">
+      <div class="card-head"><h2>Integrations</h2><button class="primary settings-save" data-pref-form="integrations-form" data-endpoint="/settings/ai-config">Save Changes</button></div>
+      <form id="integrations-form" class="integration-grid">
+        <article class="integration-card">
+          <h3>Gemini API <span id="gemini-status" class="status red">Not Connected</span></h3>
+          <label>API Key<input name="gemini_api_key" type="password" value="{{ prefs.gemini_api_key or '' }}" placeholder="AIza..."></label>
+          <label>Model<select name="ai_model"><option value="gemini-1.5-flash">Gemini 1.5 Flash</option><option value="gemini-1.5-pro">Gemini 1.5 Pro</option></select></label>
+          <button type="button" class="secondary" id="test-gemini">Test Connection</button>
+        </article>
+        <article class="integration-card">
+          <h3>Email (SMTP) <span id="smtp-status" class="status red">Not Tested</span></h3>
+          <input name="email_smtp_host" placeholder="SMTP Host" value="{{ prefs.email_smtp_host or '' }}">
+          <input name="email_smtp_port" placeholder="Port" value="{{ prefs.email_smtp_port or '' }}">
+          <input name="email_smtp_user" placeholder="Username" value="{{ prefs.email_smtp_user or '' }}">
+          <input name="email_smtp_pass" type="password" placeholder="Password" value="{{ prefs.email_smtp_pass or '' }}">
+          <input name="email_from_name" placeholder="From Name" value="{{ prefs.email_from_name or '' }}">
+          <input name="email_from_email" placeholder="From Email" value="{{ prefs.email_from_email or '' }}">
+          <button type="button" class="secondary" id="test-smtp">Send Test Email</button>
+        </article>
+      </form>
+    </section>
+  </div>
+</div>
+<div id="toast-root"></div>
+<div class="confirm-modal" id="confirm-modal"><div><h2>Confirm Action</h2><p id="confirm-message">Are you sure?</p><button class="secondary" id="confirm-cancel">Cancel</button><button class="primary danger" id="confirm-ok">Confirm</button></div></div>
+{% endblock %}

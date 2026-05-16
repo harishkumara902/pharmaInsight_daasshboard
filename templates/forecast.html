@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block page_title %}Forecast{% endblock %}
+{% block content %}
+<section class="card chart-card">
+  <div class="card-head"><h2>LSTM Forecast</h2><button class="secondary" id="retrain-btn">Retrain</button></div>
+  <div class="filters"><select id="drug-select"><option value="1">Cardiomax</option><option value="2">Neurocil</option><option value="3">Oncora</option></select><select id="region-select"><option>South</option><option>North</option><option>East</option><option>West</option><option>Central</option></select></div>
+  <canvas id="forecastChart"></canvas>
+</section>
+<section class="kpi-grid metrics"><article class="card kpi"><span>MAE</span><strong id="mae">0</strong></article><article class="card kpi"><span>RMSE</span><strong id="rmse">0</strong></article><article class="card kpi"><span>R²</span><strong id="r2">0</strong></article></section>
+{% endblock %}
